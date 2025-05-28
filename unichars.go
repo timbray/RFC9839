@@ -2,6 +2,40 @@ package unichars
 
 import "unicode/utf8"
 
+// Exported functions
+
+func IsRuneUnicodeScalar(r rune) bool {
+	return subsetContains(unicodeScalars, r)
+}
+func IsRuneXmlChar(r rune) bool {
+	return subsetContains(xmlChars, r)
+}
+func IsRuneUnicodeAssignable(r rune) bool {
+	return subsetContains(unicodeAssignables, r)
+}
+
+func IsStringUnicodeScalars(s string) bool {
+	return isStringInSubset(s, unicodeScalars)
+}
+func IsStringXmlChars(s string) bool {
+	return isStringInSubset(s, xmlChars)
+}
+func IsStringUnicodeAssignables(s string) bool {
+	return isStringInSubset(s, unicodeAssignables)
+}
+
+func IsUTF8UnicodeScalars(u []byte) bool {
+	return isUTF8InSubset(u, unicodeScalars)
+}
+func IsUTF8XmlChars(u []byte) bool {
+	return isUTF8InSubset(u, xmlChars)
+}
+func IsUTF8UnicodeAssignables(u []byte) bool {
+	return isUTF8InSubset(u, unicodeAssignables)
+}
+
+// Internal
+
 type runePair struct {
 	lo rune
 	hi rune
@@ -54,7 +88,7 @@ var unicodeAssignables = []*runePair{
 func pairContains(pair *runePair, r rune) bool {
 	return r >= pair.lo && r <= pair.hi
 }
-func rangeContains(subset []*runePair, r rune) bool {
+func subsetContains(subset []*runePair, r rune) bool {
 	for _, pair := range subset {
 		if pairContains(pair, r) {
 			return true
@@ -63,26 +97,8 @@ func rangeContains(subset []*runePair, r rune) bool {
 	return false
 }
 
-func IsRuneUnicodeScalar(r rune) bool {
-	return rangeContains(unicodeScalars, r)
-}
-func IsRuneXmlChar(r rune) bool {
-	return rangeContains(xmlChars, r)
-}
-func IsRuneUnicodeAssignable(r rune) bool {
-	return rangeContains(unicodeAssignables, r)
-}
 func isStringInSubset(s string, subset []*runePair) bool {
 	return isUTF8InSubset([]byte(s), subset)
-}
-func IsStringUnicodeScalars(s string) bool {
-	return isStringInSubset(s, unicodeScalars)
-}
-func IsStringXmlChars(s string) bool {
-	return isStringInSubset(s, xmlChars)
-}
-func IsStringUnicodeAssignables(s string) bool {
-	return isStringInSubset(s, unicodeAssignables)
 }
 func isUTF8InSubset(u []byte, subset []*runePair) bool {
 	index := 0
@@ -91,19 +107,10 @@ func isUTF8InSubset(u []byte, subset []*runePair) bool {
 		if r == 0xFFFD && width == 1 {
 			return false
 		}
-		if !rangeContains(subset, r) {
+		if !subsetContains(subset, r) {
 			return false
 		}
 		index += width
 	}
 	return true
-}
-func IsUTF8UnicodeScalars(u []byte) bool {
-	return isUTF8InSubset(u, unicodeScalars)
-}
-func IsUTF8XmlChars(u []byte) bool {
-	return isUTF8InSubset(u, xmlChars)
-}
-func IsUTF8UnicodeAssignables(u []byte) bool {
-	return isUTF8InSubset(u, unicodeAssignables)
 }
