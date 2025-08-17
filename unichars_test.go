@@ -1,4 +1,4 @@
-package unichars
+package rfc9839
 
 import (
 	"testing"

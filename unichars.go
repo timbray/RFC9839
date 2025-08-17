@@ -1,8 +1,16 @@
-package unichars
+package rfc9839
 
 import "unicode/utf8"
 
 // Exported functions
+
+type Subset int
+
+const (
+	UnicodeScalar Subset = iota
+	XmlChar
+	UnicodeAssignable
+)
 
 func IsRuneUnicodeScalar(r rune) bool {
 	return subsetContains(unicodeScalars, r)
@@ -42,7 +50,7 @@ type runePair struct {
 }
 
 // These subset ranges are not sorted by order; the ranges most likely to
-// contain runes being queried are moved to the front. "most likely" is
+// contain runes being queried are moved to the front. "Most likely" is
 // strictly based on Tim's intuition, there's no quantitative data behind it.
 
 var unicodeScalars = []runePair{
@@ -87,16 +95,15 @@ var unicodeAssignables = []runePair{
 
 // …which raises issues of how you might optimize the current "simplest thing
 // that could possibly work" implementation. I refuse to touch the code until
-// I hear about a scenario where this constitutes a detectable performance problem.
-// You could think about having three bit arrays but see
-// https://medium.com/@val_deleplace/7-ways-to-implement-a-bit-set-in-go-91650229b386
-// Plus, no matter how tight you pack, you're looking at ~400K of data structures.
+// I see evidence of noticeable slowdown.
+// Bit arrays offer constant time but no matter how tight you pack, you're
+// looking at ~400K of data structures.
 // The worst case would probably be checking a large volume of Chinese text for
 // UnicodeAssignable, because those code-points are at the third position in the
 // subset just above, so there will be 4 wasted comparison operations for each
 // code point.
 // Having said that, the current implementation has excellent data locality and will
-// thus be very CPU cache friendly.
+// probably be very CPU-cache-friendly.
 // The craziest idea (and my favorite) is to build up a sample of which runePairs are
 // being used the most and then from time to time shuffle the most-used to the front of the
 // subset slice. You'd need an AtomicPointer update to be thread-safe.
@@ -106,6 +113,7 @@ var unicodeAssignables = []runePair{
 func pairContains(pair runePair, r rune) bool {
 	return r >= pair.lo && r <= pair.hi
 }
+
 func subsetContains(subset []runePair, r rune) bool {
 	for _, pair := range subset {
 		if pairContains(pair, r) {
@@ -118,6 +126,7 @@ func subsetContains(subset []runePair, r rune) bool {
 func isStringInSubset(s string, subset []runePair) bool {
 	return isUTF8InSubset([]byte(s), subset)
 }
+
 func isUTF8InSubset(u []byte, subset []runePair) bool {
 	index := 0
 	for index < len(u) {
