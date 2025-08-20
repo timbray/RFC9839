@@ -1,7 +1,7 @@
 # RFC9839
 
 [![Tests](https://github.com/timbray/quamina/actions/workflows/go-unit-tests.yaml/badge.svg)](https://github.com/timbray/quamina/actions/workflows/go-unit-tests.yaml)
-[![codecov](https://codecov.io/gh/timbray/quamina/branch/main/graph/badge.svg?token=TC7MW723JO)](https://codecov.io/gh/timbray/quamina)
+[![codecov](https://codecov.io/gh/timbray/RFC9839/branch/main/graph/badge.svg?token=TC7MW723JO)](https://codecov.io/gh/timbray/RFC9839)
 [![0 dependencies!](https://0dependencies.dev/0dependencies.svg)](https://0dependencies.dev)
 
 Go-language library to check for problematic Unicode code points.
