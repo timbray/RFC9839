@@ -1,0 +1,11 @@
+[package]
+name = "rfc9839"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+keywords = ["RFC9839", "Unicode"]
+repository = "https://github.com/urschrei/rfc9839"
+
+[dependencies]
+
+[dev-dependencies]
