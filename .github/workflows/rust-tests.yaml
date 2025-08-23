@@ -1,0 +1,45 @@
+name: Rust Tests
+
+on:
+  push:
+    branches: ["main"]
+
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: r9839-rust-tests-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Rust Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Run tests
+        run: cargo test --verbose
+
+      - name: Run doctests
+        run: cargo test --doc --verbose
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      - name: Run clippy
+        run: cargo clippy -- -D warnings
+
+      - name: Verify git clean
+        shell: bash
+        run: |
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "${{ github.repository }} up to date."
+          else
+            echo "${{ github.repository }} is dirty."
+            echo "::error:: $(git status)"
+            exit 1
+          fi
