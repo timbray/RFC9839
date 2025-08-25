@@ -1,6 +1,9 @@
 package rfc9839
 
-import "unicode/utf8"
+import (
+	"unicode"
+	"unicode/utf8"
+)
 
 // Exported functions
 
@@ -13,13 +16,13 @@ const (
 )
 
 func IsRuneUnicodeScalar(r rune) bool {
-	return subsetContains(unicodeScalars, r)
+	return unicode.Is(unicodeScalars, r)
 }
 func IsRuneXmlChar(r rune) bool {
-	return subsetContains(xmlChars, r)
+	return unicode.Is(xmlChars, r)
 }
 func IsRuneUnicodeAssignable(r rune) bool {
-	return subsetContains(unicodeAssignables, r)
+	return unicode.Is(unicodeAssignables, r)
 }
 
 func IsStringUnicodeScalars(s string) bool {
@@ -44,53 +47,60 @@ func IsUTF8UnicodeAssignables(u []byte) bool {
 
 // Internal
 
-type runePair struct {
-	lo rune
-	hi rune
-}
-
 // These subset ranges are not sorted by order; the ranges most likely to
 // contain runes being queried are moved to the front. "Most likely" is
 // strictly based on Tim's intuition, there's no quantitative data behind it.
 
-var unicodeScalars = []runePair{
-	{0, 0xD7FF},        // most of the BMP
-	{0xE000, 0x10FFFF}, // mostly astral planes
+var unicodeScalars = &unicode.RangeTable{
+	R16: []unicode.Range16{
+		{Lo: 0x0000, Hi: 0xD7FF, Stride: 1}, // most of the BMP
+	},
+	R32: []unicode.Range32{
+		{Lo: 0xE000, Hi: 0x10FFFF, Stride: 1}, // mostly astral planes
+	},
 }
 
-var xmlChars = []runePair{
-	{0x20, 0xD7FF},      // most of the BMP
-	{0xA, 0xA},          // newline
-	{0xE000, 0xFFFD},    // BMP after surrogates
-	{0x9, 0x9},          // Tab
-	{0xD, 0xD},          // CR
-	{0x10000, 0x10FFFF}, // astral planes
+var xmlChars = &unicode.RangeTable{
+	R16: []unicode.Range16{
+		{Lo: 0x0009, Hi: 0x0009, Stride: 1}, // Tab
+		{Lo: 0x000A, Hi: 0x000A, Stride: 1}, // newline
+		{Lo: 0x000D, Hi: 0x000D, Stride: 1}, // CR
+		{Lo: 0x0020, Hi: 0xD7FF, Stride: 1}, // most of the BMP
+		{Lo: 0xE000, Hi: 0xFFFD, Stride: 1}, // BMP after surrogates
+	},
+	R32: []unicode.Range32{
+		{Lo: 0x10000, Hi: 0x10FFFF, Stride: 1}, // astral planes
+	},
 }
 
-var unicodeAssignables = []runePair{
-	{0x20, 0x7E},       // ASCII
-	{0xA, 0xA},         // newline
-	{0xA0, 0xD7FF},     // most of the BMP
-	{0xE000, 0xFDCF},   // BMP after surrogates
-	{0xFDF0, 0xFFFD},   // BMP after noncharacters block
-	{0x9, 0x9},         // Tab
-	{0xD, 0xD},         // CR
-	{0x10000, 0x1FFFD}, // astral planes from here down
-	{0x20000, 0x2FFFD},
-	{0x30000, 0x3FFFD},
-	{0x40000, 0x4FFFD},
-	{0x50000, 0x5FFFD},
-	{0x60000, 0x6FFFD},
-	{0x70000, 0x7FFFD},
-	{0x80000, 0x8FFFD},
-	{0x90000, 0x9FFFD},
-	{0xA0000, 0xAFFFD},
-	{0xB0000, 0xBFFFD},
-	{0xC0000, 0xCFFFD},
-	{0xD0000, 0xDFFFD},
-	{0xE0000, 0xEFFFD},
-	{0xF0000, 0xFFFFD},
-	{0x100000, 0x10FFFD},
+var unicodeAssignables = &unicode.RangeTable{
+	R16: []unicode.Range16{
+		{Lo: 0x0009, Hi: 0x0009, Stride: 1}, // Tab
+		{Lo: 0x000A, Hi: 0x000A, Stride: 1}, // newline
+		{Lo: 0x000D, Hi: 0x000D, Stride: 1}, // CR
+		{Lo: 0x0020, Hi: 0x007E, Stride: 1}, // ASCII
+		{Lo: 0x00A0, Hi: 0xD7FF, Stride: 1}, // most of the BMP
+		{Lo: 0xE000, Hi: 0xFDCF, Stride: 1}, // BMP after surrogates
+		{Lo: 0xFDF0, Hi: 0xFFFD, Stride: 1}, // BMP after noncharacters block
+	},
+	R32: []unicode.Range32{
+		{Lo: 0x10000, Hi: 0x1FFFD, Stride: 1}, // astral planes from here down
+		{Lo: 0x20000, Hi: 0x2FFFD, Stride: 1},
+		{Lo: 0x30000, Hi: 0x3FFFD, Stride: 1},
+		{Lo: 0x40000, Hi: 0x4FFFD, Stride: 1},
+		{Lo: 0x50000, Hi: 0x5FFFD, Stride: 1},
+		{Lo: 0x60000, Hi: 0x6FFFD, Stride: 1},
+		{Lo: 0x70000, Hi: 0x7FFFD, Stride: 1},
+		{Lo: 0x80000, Hi: 0x8FFFD, Stride: 1},
+		{Lo: 0x90000, Hi: 0x9FFFD, Stride: 1},
+		{Lo: 0xA0000, Hi: 0xAFFFD, Stride: 1},
+		{Lo: 0xB0000, Hi: 0xBFFFD, Stride: 1},
+		{Lo: 0xC0000, Hi: 0xCFFFD, Stride: 1},
+		{Lo: 0xD0000, Hi: 0xDFFFD, Stride: 1},
+		{Lo: 0xE0000, Hi: 0xEFFFD, Stride: 1},
+		{Lo: 0xF0000, Hi: 0xFFFFD, Stride: 1},
+		{Lo: 0x100000, Hi: 0x10FFFD, Stride: 1},
+	},
 }
 
 // …which raises issues of how you might optimize the current "simplest thing
@@ -110,24 +120,11 @@ var unicodeAssignables = []runePair{
 // But like I said, I refuse to do anything without a sample corpus that is causing
 // a measurable delay.
 
-func pairContains(pair runePair, r rune) bool {
-	return r >= pair.lo && r <= pair.hi
-}
-
-func subsetContains(subset []runePair, r rune) bool {
-	for _, pair := range subset {
-		if pairContains(pair, r) {
-			return true
-		}
-	}
-	return false
-}
-
-func isStringInSubset(s string, subset []runePair) bool {
+func isStringInSubset(s string, subset *unicode.RangeTable) bool {
 	return isUTF8InSubset([]byte(s), subset)
 }
 
-func isUTF8InSubset(u []byte, subset []runePair) bool {
+func isUTF8InSubset(u []byte, subset *unicode.RangeTable) bool {
 	index := 0
 	for index < len(u) {
 		r, width := utf8.DecodeRune(u[index:])
@@ -136,7 +133,7 @@ func isUTF8InSubset(u []byte, subset []runePair) bool {
 			// including surrogate values
 			return false
 		}
-		if !subsetContains(subset, r) {
+		if !unicode.Is(subset, r) {
 			return false
 		}
 		index += width
