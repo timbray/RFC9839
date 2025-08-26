@@ -1,6 +1,6 @@
 # RFC9839
 
-[![Tests](https://github.com/timbray/quamina/actions/workflows/go-unit-tests.yaml/badge.svg)](https://github.com/timbray/quamina/actions/workflows/go-unit-tests.yaml)
+[![Tests](https://github.com/timbray/RFC9839/actions/workflows/go-unit-tests.yaml/badge.svg)](https://github.com/timbray/RFC9839/actions/workflows/go-unit-tests.yaml)
 [![codecov](https://codecov.io/gh/timbray/RFC9839/graph/badge.svg?token=6V5I17FTIM)](https://codecov.io/gh/timbray/RFC9839)
 [![0 dependencies!](https://0dependencies.dev/0dependencies.svg)](https://0dependencies.dev)
 
@@ -9,10 +9,9 @@ Go-language library to check for problematic Unicode code points.
 This is based on the Unicode code-point subsets specified in RFC9839.
 
 There are three named subsets:
+
 - Unicode Scalars
 - XML Characters
 - Unicode Assignables
 
 The exported function names are descriptive of what they do.
-
-
