@@ -5,53 +5,27 @@ import (
 	"unicode/utf8"
 )
 
-// Exported functions
-
-type Subset int
-
-const (
-	UnicodeScalar Subset = iota
-	XmlChar
-	UnicodeAssignable
-)
-
-func IsRuneUnicodeScalar(r rune) bool {
-	return unicode.Is(unicodeScalars, r)
-}
-func IsRuneXmlChar(r rune) bool {
-	return unicode.Is(xmlChars, r)
-}
-func IsRuneUnicodeAssignable(r rune) bool {
-	return unicode.Is(unicodeAssignables, r)
-}
-
 func IsStringUnicodeScalars(s string) bool {
-	return isStringInSubset(s, unicodeScalars)
+	return isStringInSubset(s, UnicodeScalars)
 }
 func IsStringXmlChars(s string) bool {
-	return isStringInSubset(s, xmlChars)
+	return isStringInSubset(s, XmlChars)
 }
 func IsStringUnicodeAssignables(s string) bool {
-	return isStringInSubset(s, unicodeAssignables)
+	return isStringInSubset(s, UnicodeAssignables)
 }
 
 func IsUTF8UnicodeScalars(u []byte) bool {
-	return isUTF8InSubset(u, unicodeScalars)
+	return isUTF8InSubset(u, UnicodeScalars)
 }
 func IsUTF8XmlChars(u []byte) bool {
-	return isUTF8InSubset(u, xmlChars)
+	return isUTF8InSubset(u, XmlChars)
 }
 func IsUTF8UnicodeAssignables(u []byte) bool {
-	return isUTF8InSubset(u, unicodeAssignables)
+	return isUTF8InSubset(u, UnicodeAssignables)
 }
 
-// Internal
-
-// These subset ranges are not sorted by order; the ranges most likely to
-// contain runes being queried are moved to the front. "Most likely" is
-// strictly based on Tim's intuition, there's no quantitative data behind it.
-
-var unicodeScalars = &unicode.RangeTable{
+var UnicodeScalars = &unicode.RangeTable{
 	R16: []unicode.Range16{
 		{Lo: 0x0000, Hi: 0xD7FF, Stride: 1}, // most of the BMP
 	},
@@ -60,10 +34,9 @@ var unicodeScalars = &unicode.RangeTable{
 	},
 }
 
-var xmlChars = &unicode.RangeTable{
+var XmlChars = &unicode.RangeTable{
 	R16: []unicode.Range16{
-		{Lo: 0x0009, Hi: 0x0009, Stride: 1}, // Tab
-		{Lo: 0x000A, Hi: 0x000A, Stride: 1}, // newline
+		{Lo: 0x0009, Hi: 0x000A, Stride: 1}, // tab & newline
 		{Lo: 0x000D, Hi: 0x000D, Stride: 1}, // CR
 		{Lo: 0x0020, Hi: 0xD7FF, Stride: 1}, // most of the BMP
 		{Lo: 0xE000, Hi: 0xFFFD, Stride: 1}, // BMP after surrogates
@@ -73,10 +46,9 @@ var xmlChars = &unicode.RangeTable{
 	},
 }
 
-var unicodeAssignables = &unicode.RangeTable{
+var UnicodeAssignables = &unicode.RangeTable{
 	R16: []unicode.Range16{
-		{Lo: 0x0009, Hi: 0x0009, Stride: 1}, // Tab
-		{Lo: 0x000A, Hi: 0x000A, Stride: 1}, // newline
+		{Lo: 0x0009, Hi: 0x000A, Stride: 1}, // tab & newline
 		{Lo: 0x000D, Hi: 0x000D, Stride: 1}, // CR
 		{Lo: 0x0020, Hi: 0x007E, Stride: 1}, // ASCII
 		{Lo: 0x00A0, Hi: 0xD7FF, Stride: 1}, // most of the BMP

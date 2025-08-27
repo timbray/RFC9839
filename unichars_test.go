@@ -2,6 +2,7 @@ package rfc9839
 
 import (
 	"testing"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -47,16 +48,16 @@ func TestEmpties(t *testing.T) {
 
 func TestScalars(t *testing.T) {
 	// Test that all runes in our unicodeScalars table are accepted
-	for _, r16 := range unicodeScalars.R16 {
+	for _, r16 := range UnicodeScalars.R16 {
 		for r := r16.Lo; r <= r16.Hi; r += r16.Stride {
-			if !IsRuneUnicodeScalar(rune(r)) {
+			if !unicode.Is(UnicodeScalars, rune(r)) {
 				t.Errorf("%x should be unicode scalar", r)
 			}
 		}
 	}
-	for _, r32 := range unicodeScalars.R32 {
+	for _, r32 := range UnicodeScalars.R32 {
 		for r := r32.Lo; r <= r32.Hi; r += r32.Stride {
-			if !IsRuneUnicodeScalar(rune(r)) {
+			if !unicode.Is(UnicodeScalars, rune(r)) {
 				t.Errorf("%x should be unicode scalar", r)
 			}
 		}
@@ -64,15 +65,15 @@ func TestScalars(t *testing.T) {
 
 	// Test that surrogate pairs are rejected
 	for _, r := range inverseScalars {
-		if IsRuneUnicodeScalar(r) {
+		if unicode.Is(UnicodeScalars, r) {
 			t.Errorf("%x should not be unicode scalar", r)
 		}
 	}
 
-	if IsRuneUnicodeScalar(-1) {
+	if unicode.Is(UnicodeScalars, -1) {
 		t.Error("-1 should not be scalar")
 	}
-	if IsRuneUnicodeScalar(0x10FFFF + 1) {
+	if unicode.Is(UnicodeScalars, 0x10FFFF+1) {
 		t.Error("0x10FFFF+1 should not be scalar")
 	}
 
@@ -99,16 +100,16 @@ var inverseXML = []rune{
 
 func TestXmlChars(t *testing.T) {
 	// Test that all runes in our xmlChars table are accepted
-	for _, r16 := range xmlChars.R16 {
+	for _, r16 := range XmlChars.R16 {
 		for r := r16.Lo; r <= r16.Hi; r += r16.Stride {
-			if !IsRuneXmlChar(rune(r)) {
+			if !unicode.Is(XmlChars, rune(r)) {
 				t.Errorf("%x should be XML", r)
 			}
 		}
 	}
-	for _, r32 := range xmlChars.R32 {
+	for _, r32 := range XmlChars.R32 {
 		for r := r32.Lo; r <= r32.Hi; r += r32.Stride {
-			if !IsRuneXmlChar(rune(r)) {
+			if !unicode.Is(XmlChars, rune(r)) {
 				t.Errorf("%x should be XML", r)
 			}
 		}
@@ -116,15 +117,15 @@ func TestXmlChars(t *testing.T) {
 
 	// Test that inverse ranges are rejected
 	for _, r := range inverseXML {
-		if IsRuneXmlChar(r) {
+		if unicode.Is(XmlChars, r) {
 			t.Errorf("%x should not be XML", r)
 		}
 	}
 
-	if IsRuneXmlChar(-1) {
+	if unicode.Is(XmlChars, -1) {
 		t.Error("-1 should not be scalar")
 	}
-	if IsRuneXmlChar(0x10FFFF + 1) {
+	if unicode.Is(XmlChars, 0x10FFFF+1) {
 		t.Error("0x10FFFF+1 should not be scalar")
 	}
 
@@ -142,7 +143,7 @@ func TestXmlChars(t *testing.T) {
 	// Test good strings
 	goodS := []rune{}
 	goodU := []byte{}
-	for _, r16 := range xmlChars.R16 {
+	for _, r16 := range XmlChars.R16 {
 		goodS = append(goodS, rune(r16.Lo), rune(r16.Hi))
 		loLen := utf8.RuneLen(rune(r16.Lo))
 		if loLen > 0 {
@@ -157,7 +158,7 @@ func TestXmlChars(t *testing.T) {
 			goodU = append(goodU, u...)
 		}
 	}
-	for _, r32 := range xmlChars.R32 {
+	for _, r32 := range XmlChars.R32 {
 		goodS = append(goodS, rune(r32.Lo), rune(r32.Hi))
 		loLen := utf8.RuneLen(rune(r32.Lo))
 		if loLen > 0 {
@@ -230,16 +231,16 @@ var inverseAssignables = []rune{
 
 func TestAssignables(t *testing.T) {
 	// Test that all runes in our unicodeAssignables table are accepted
-	for _, r16 := range unicodeAssignables.R16 {
+	for _, r16 := range UnicodeAssignables.R16 {
 		for r := r16.Lo; r <= r16.Hi; r += r16.Stride {
-			if !IsRuneUnicodeAssignable(rune(r)) {
+			if !unicode.Is(UnicodeAssignables, rune(r)) {
 				t.Errorf("%x should be Assignable", r)
 			}
 		}
 	}
-	for _, r32 := range unicodeAssignables.R32 {
+	for _, r32 := range UnicodeAssignables.R32 {
 		for r := r32.Lo; r <= r32.Hi; r += r32.Stride {
-			if !IsRuneUnicodeAssignable(rune(r)) {
+			if !unicode.Is(UnicodeAssignables, rune(r)) {
 				t.Errorf("%x should be Assignable", r)
 			}
 		}
@@ -247,15 +248,15 @@ func TestAssignables(t *testing.T) {
 
 	// Test that inverse ranges are rejected
 	for _, r := range inverseAssignables {
-		if IsRuneUnicodeAssignable(r) {
+		if unicode.Is(UnicodeAssignables, r) {
 			t.Errorf("%x should not be Assignable", r)
 		}
 	}
 
-	if IsRuneUnicodeAssignable(-1) {
+	if unicode.Is(UnicodeAssignables, -1) {
 		t.Error("-1 should not be scalar")
 	}
-	if IsRuneUnicodeAssignable(0x10FFFF + 1) {
+	if unicode.Is(UnicodeAssignables, 0x10FFFF+1) {
 		t.Error("0x10FFFF+1 should not be scalar")
 	}
 
@@ -273,7 +274,7 @@ func TestAssignables(t *testing.T) {
 	// Test good strings
 	goodS := []rune{}
 	goodU := []byte{}
-	for _, r16 := range unicodeAssignables.R16 {
+	for _, r16 := range UnicodeAssignables.R16 {
 		goodS = append(goodS, rune(r16.Lo), rune(r16.Hi))
 		loLen := utf8.RuneLen(rune(r16.Lo))
 		if loLen > 0 {
@@ -288,7 +289,7 @@ func TestAssignables(t *testing.T) {
 			goodU = append(goodU, u...)
 		}
 	}
-	for _, r32 := range unicodeAssignables.R32 {
+	for _, r32 := range UnicodeAssignables.R32 {
 		goodS = append(goodS, rune(r32.Lo), rune(r32.Hi))
 		loLen := utf8.RuneLen(rune(r32.Lo))
 		if loLen > 0 {
