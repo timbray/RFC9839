@@ -2,7 +2,6 @@ package rfc9839
 
 import (
 	"testing"
-	"unicode"
 	"unicode/utf8"
 )
 
@@ -11,53 +10,46 @@ var inverseScalars = []rune{
 }
 
 func TestEmpties(t *testing.T) {
-	var emptyU1 = []byte{}
+	var emptyU1 []byte
 	var emptyU2 []byte = nil
 	var emptyS = ""
 
-	if !IsUTF8UnicodeScalars(emptyU1) {
+	if !Scalars.ValidUtf8(emptyU1) {
 		t.Error("zero-length []byte failure")
 	}
-	if !IsUTF8XmlChars(emptyU1) {
+	if !XmlChars.ValidUtf8(emptyU1) {
 		t.Error("zero-length []byte failure")
 	}
-	if !IsUTF8UnicodeAssignables(emptyU1) {
+	if !Assignables.ValidUtf8(emptyU1) {
 		t.Error("zero-length []byte failure")
 	}
 
-	if !IsUTF8UnicodeScalars(emptyU2) {
+	if !Scalars.ValidUtf8(emptyU2) {
 		t.Error("nil []byte failure")
 	}
-	if !IsUTF8XmlChars(emptyU2) {
+	if !XmlChars.ValidUtf8(emptyU2) {
 		t.Error("nil []byte failure")
 	}
-	if !IsUTF8UnicodeAssignables(emptyU2) {
+	if !Assignables.ValidUtf8(emptyU2) {
 		t.Error("nil []byte failure")
 	}
 
-	if !IsStringUnicodeScalars(emptyS) {
+	if !Scalars.ValidString(emptyS) {
 		t.Error("empty string failure")
 	}
-	if !IsStringXmlChars(emptyS) {
+	if !XmlChars.ValidString(emptyS) {
 		t.Error("empty string failure")
 	}
-	if !IsStringUnicodeAssignables(emptyS) {
+	if !Assignables.ValidString(emptyS) {
 		t.Error("empty string failure")
 	}
 }
 
 func TestScalars(t *testing.T) {
 	// Test that all runes in our unicodeScalars table are accepted
-	for _, r16 := range UnicodeScalars.R16 {
-		for r := r16.Lo; r <= r16.Hi; r += r16.Stride {
-			if !unicode.Is(UnicodeScalars, rune(r)) {
-				t.Errorf("%x should be unicode scalar", r)
-			}
-		}
-	}
-	for _, r32 := range UnicodeScalars.R32 {
-		for r := r32.Lo; r <= r32.Hi; r += r32.Stride {
-			if !unicode.Is(UnicodeScalars, rune(r)) {
+	for _, pair := range Scalars.pairs {
+		for r := pair.lo; r <= pair.hi; r += 1 {
+			if !Scalars.ValidRune(r) {
 				t.Errorf("%x should be unicode scalar", r)
 			}
 		}
@@ -65,15 +57,15 @@ func TestScalars(t *testing.T) {
 
 	// Test that surrogate pairs are rejected
 	for _, r := range inverseScalars {
-		if unicode.Is(UnicodeScalars, r) {
+		if Scalars.ValidRune(r) {
 			t.Errorf("%x should not be unicode scalar", r)
 		}
 	}
 
-	if unicode.Is(UnicodeScalars, -1) {
+	if Scalars.ValidRune(-1) {
 		t.Error("-1 should not be scalar")
 	}
-	if unicode.Is(UnicodeScalars, 0x10FFFF+1) {
+	if Scalars.ValidRune(0x10FFFF + 1) {
 		t.Error("0x10FFFF+1 should not be scalar")
 	}
 
@@ -82,10 +74,10 @@ func TestScalars(t *testing.T) {
 	bad := []byte{'a'}
 	bad = append(bad, badUTF8...)
 	bad = append(bad, 'z')
-	if IsUTF8UnicodeScalars(bad) {
+	if Scalars.ValidUtf8(bad) {
 		t.Error("accepted invalid UTF8")
 	}
-	if IsStringUnicodeScalars(string(bad)) {
+	if Scalars.ValidString(string(bad)) {
 		t.Error("accepted invalid UTF8")
 	}
 }
@@ -100,16 +92,9 @@ var inverseXML = []rune{
 
 func TestXmlChars(t *testing.T) {
 	// Test that all runes in our xmlChars table are accepted
-	for _, r16 := range XmlChars.R16 {
-		for r := r16.Lo; r <= r16.Hi; r += r16.Stride {
-			if !unicode.Is(XmlChars, rune(r)) {
-				t.Errorf("%x should be XML", r)
-			}
-		}
-	}
-	for _, r32 := range XmlChars.R32 {
-		for r := r32.Lo; r <= r32.Hi; r += r32.Stride {
-			if !unicode.Is(XmlChars, rune(r)) {
+	for _, pair := range XmlChars.pairs {
+		for r := pair.lo; r <= pair.hi; r += 1 {
+			if !XmlChars.ValidRune(r) {
 				t.Errorf("%x should be XML", r)
 			}
 		}
@@ -117,15 +102,15 @@ func TestXmlChars(t *testing.T) {
 
 	// Test that inverse ranges are rejected
 	for _, r := range inverseXML {
-		if unicode.Is(XmlChars, r) {
+		if XmlChars.ValidRune(r) {
 			t.Errorf("%x should not be XML", r)
 		}
 	}
 
-	if unicode.Is(XmlChars, -1) {
+	if XmlChars.ValidRune(-1) {
 		t.Error("-1 should not be scalar")
 	}
-	if unicode.Is(XmlChars, 0x10FFFF+1) {
+	if XmlChars.ValidRune(0x10FFFF + 1) {
 		t.Error("0x10FFFF+1 should not be scalar")
 	}
 
@@ -133,51 +118,51 @@ func TestXmlChars(t *testing.T) {
 	bad := []byte{'a'}
 	bad = append(bad, badUTF8...)
 	bad = append(bad, 'z')
-	if IsUTF8XmlChars(bad) {
+	if XmlChars.ValidUtf8(bad) {
 		t.Error("accepted invalid UTF8")
 	}
-	if IsStringXmlChars(string(bad)) {
+	if XmlChars.ValidString(string(bad)) {
 		t.Error("accepted invalid UTF8")
 	}
 
 	// Test good strings
-	goodS := []rune{}
-	goodU := []byte{}
-	for _, r16 := range XmlChars.R16 {
-		goodS = append(goodS, rune(r16.Lo), rune(r16.Hi))
-		loLen := utf8.RuneLen(rune(r16.Lo))
+	var goodS []rune
+	var goodU []byte
+	for _, pair := range XmlChars.pairs {
+		goodS = append(goodS, pair.lo, pair.hi)
+		loLen := utf8.RuneLen(pair.lo)
 		if loLen > 0 {
 			u := make([]byte, loLen)
-			utf8.EncodeRune(u, rune(r16.Lo))
+			utf8.EncodeRune(u, pair.lo)
 			goodU = append(goodU, u...)
 		}
-		hiLen := utf8.RuneLen(rune(r16.Hi))
+		hiLen := utf8.RuneLen(pair.hi)
 		if hiLen > 0 {
 			u := make([]byte, hiLen)
-			utf8.EncodeRune(u, rune(r16.Hi))
+			utf8.EncodeRune(u, pair.hi)
 			goodU = append(goodU, u...)
 		}
 	}
-	for _, r32 := range XmlChars.R32 {
-		goodS = append(goodS, rune(r32.Lo), rune(r32.Hi))
-		loLen := utf8.RuneLen(rune(r32.Lo))
+	for _, pair := range XmlChars.pairs {
+		goodS = append(goodS, pair.lo, pair.hi)
+		loLen := utf8.RuneLen(pair.lo)
 		if loLen > 0 {
 			u := make([]byte, loLen)
-			utf8.EncodeRune(u, rune(r32.Lo))
+			utf8.EncodeRune(u, pair.lo)
 			goodU = append(goodU, u...)
 		}
-		hiLen := utf8.RuneLen(rune(r32.Hi))
+		hiLen := utf8.RuneLen(pair.hi)
 		if hiLen > 0 {
 			u := make([]byte, hiLen)
-			utf8.EncodeRune(u, rune(r32.Hi))
+			utf8.EncodeRune(u, pair.hi)
 			goodU = append(goodU, u...)
 		}
 	}
 
-	if !IsStringXmlChars(string(goodS)) {
+	if !XmlChars.ValidString(string(goodS)) {
 		t.Error("good string rejected")
 	}
-	if !IsUTF8XmlChars(goodU) {
+	if !XmlChars.ValidUtf8(goodU) {
 		t.Error("good UTF8 rejected")
 	}
 
@@ -193,10 +178,10 @@ func TestXmlChars(t *testing.T) {
 			utf8.EncodeRune(u, r)
 			u = append(bad, u...)
 			u = append(u, 'z')
-			if IsUTF8XmlChars(u) {
+			if XmlChars.ValidUtf8(u) {
 				t.Errorf("accepted utf8 containing %x", r)
 			}
-			if IsStringXmlChars(string(u)) {
+			if XmlChars.ValidString(string(u)) {
 				t.Errorf("accepted utf8 containing %x", r)
 			}
 		}
@@ -231,16 +216,9 @@ var inverseAssignables = []rune{
 
 func TestAssignables(t *testing.T) {
 	// Test that all runes in our unicodeAssignables table are accepted
-	for _, r16 := range UnicodeAssignables.R16 {
-		for r := r16.Lo; r <= r16.Hi; r += r16.Stride {
-			if !unicode.Is(UnicodeAssignables, rune(r)) {
-				t.Errorf("%x should be Assignable", r)
-			}
-		}
-	}
-	for _, r32 := range UnicodeAssignables.R32 {
-		for r := r32.Lo; r <= r32.Hi; r += r32.Stride {
-			if !unicode.Is(UnicodeAssignables, rune(r)) {
+	for _, pair := range Assignables.pairs {
+		for r := pair.lo; r <= pair.hi; r += 1 {
+			if !Assignables.ValidRune(r) {
 				t.Errorf("%x should be Assignable", r)
 			}
 		}
@@ -248,15 +226,15 @@ func TestAssignables(t *testing.T) {
 
 	// Test that inverse ranges are rejected
 	for _, r := range inverseAssignables {
-		if unicode.Is(UnicodeAssignables, r) {
+		if Assignables.ValidRune(r) {
 			t.Errorf("%x should not be Assignable", r)
 		}
 	}
 
-	if unicode.Is(UnicodeAssignables, -1) {
+	if Assignables.ValidRune(-1) {
 		t.Error("-1 should not be scalar")
 	}
-	if unicode.Is(UnicodeAssignables, 0x10FFFF+1) {
+	if Assignables.ValidRune(0x10FFFF + 1) {
 		t.Error("0x10FFFF+1 should not be scalar")
 	}
 
@@ -264,51 +242,36 @@ func TestAssignables(t *testing.T) {
 	bad := []byte{'a'}
 	bad = append(bad, badUTF8...)
 	bad = append(bad, 'z')
-	if IsUTF8UnicodeAssignables(bad) {
+	if Assignables.ValidUtf8(bad) {
 		t.Error("accepted invalid UTF8")
 	}
-	if IsStringUnicodeAssignables(string(bad)) {
+	if Assignables.ValidString(string(bad)) {
 		t.Error("accepted invalid UTF8")
 	}
 
 	// Test good strings
-	goodS := []rune{}
-	goodU := []byte{}
-	for _, r16 := range UnicodeAssignables.R16 {
-		goodS = append(goodS, rune(r16.Lo), rune(r16.Hi))
-		loLen := utf8.RuneLen(rune(r16.Lo))
+	var goodS []rune
+	var goodU []byte
+	for _, pair := range Assignables.pairs {
+		goodS = append(goodS, pair.lo, pair.hi)
+		loLen := utf8.RuneLen(pair.lo)
 		if loLen > 0 {
 			u := make([]byte, loLen)
-			utf8.EncodeRune(u, rune(r16.Lo))
+			utf8.EncodeRune(u, pair.lo)
 			goodU = append(goodU, u...)
 		}
-		hiLen := utf8.RuneLen(rune(r16.Hi))
+		hiLen := utf8.RuneLen(pair.hi)
 		if hiLen > 0 {
 			u := make([]byte, hiLen)
-			utf8.EncodeRune(u, rune(r16.Hi))
-			goodU = append(goodU, u...)
-		}
-	}
-	for _, r32 := range UnicodeAssignables.R32 {
-		goodS = append(goodS, rune(r32.Lo), rune(r32.Hi))
-		loLen := utf8.RuneLen(rune(r32.Lo))
-		if loLen > 0 {
-			u := make([]byte, loLen)
-			utf8.EncodeRune(u, rune(r32.Lo))
-			goodU = append(goodU, u...)
-		}
-		hiLen := utf8.RuneLen(rune(r32.Hi))
-		if hiLen > 0 {
-			u := make([]byte, hiLen)
-			utf8.EncodeRune(u, rune(r32.Hi))
+			utf8.EncodeRune(u, pair.hi)
 			goodU = append(goodU, u...)
 		}
 	}
 
-	if !IsStringUnicodeAssignables(string(goodS)) {
+	if !Assignables.ValidString(string(goodS)) {
 		t.Error("good string rejected")
 	}
-	if !IsUTF8UnicodeAssignables(goodU) {
+	if !Assignables.ValidUtf8(goodU) {
 		t.Error("good UTF8 rejected")
 	}
 
@@ -324,10 +287,10 @@ func TestAssignables(t *testing.T) {
 			utf8.EncodeRune(u, r)
 			u = append(bad, u...)
 			u = append(u, 'z')
-			if IsUTF8UnicodeAssignables(u) {
+			if Assignables.ValidUtf8(u) {
 				t.Errorf("accepted utf8 containing %x", r)
 			}
-			if IsStringUnicodeAssignables(string(u)) {
+			if Assignables.ValidString(string(u)) {
 				t.Errorf("accepted utf8 containing %x", r)
 			}
 		}

@@ -6,12 +6,21 @@
 
 Go-language library to check for problematic Unicode code points.
 
-This is based on the Unicode code-point subsets specified in RFC9839.
+This is based on the Unicode code-point subsets specified in [RFC9839](https://www.rfc-editor.org/rfc/rfc9839.html).
 
-There are three named subsets:
+The package defines a `Subset` type and exports three instances, named `Scalars`,
+`XmlChars`, and `Assignables`. It exports three functions:
 
-- Unicode Scalars
-- XML Characters
-- Unicode Assignables
+```go
+func (sub *Subset) ValidRune(r rune) bool
+func (sub *Subset) ValidString(s string) bool
+func (sub *Subset) ValidUtf8(u []byte) bool
+```
 
-The exported function names are descriptive of what they do.
+A typical call might look like:
+
+```go
+if !rfc9839.Assignables.ValidRune(r) {
+	return t.Error("invalid rune")
+}
+```
