@@ -14,9 +14,13 @@ type Subset struct{ pairs []runePair }
 func (sub *Subset) ValidRune(r rune) bool {
 	return subsetContains(sub, r)
 }
-func (sub *Subset) ValidString(s string) bool {
+func (sub *Subset) ValidStringPrevious(s string) bool {
 	return isUTF8InSubset([]byte(s), sub)
 }
+func (sub *Subset) ValidString(s string) bool {
+	return isStringInSubset(s, sub)
+}
+
 func (sub *Subset) ValidUtf8(u []byte) bool {
 	return isUTF8InSubset(u, sub)
 }
@@ -94,6 +98,23 @@ func isUTF8InSubset(u []byte, sub *Subset) bool {
 	index := 0
 	for index < len(u) {
 		r, width := utf8.DecodeRune(u[index:])
+		if r == 0xFFFD && width == 1 {
+			// this is how the utf8 pkg signals invalid UTF8 bytes, notably
+			// including surrogate values
+			return false
+		}
+		if !subsetContains(sub, r) {
+			return false
+		}
+		index += width
+	}
+	return true
+}
+
+func isStringInSubset(s string, sub *Subset) bool {
+	index := 0
+	for index < len(s) {
+		r, width := utf8.DecodeRuneInString(s[index:])
 		if r == 0xFFFD && width == 1 {
 			// this is how the utf8 pkg signals invalid UTF8 bytes, notably
 			// including surrogate values
