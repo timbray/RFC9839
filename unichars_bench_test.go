@@ -31,7 +31,7 @@ func BenchmarkValidStringPrevious(b *testing.B) {
 	}
 
 	bytes := len(file)
-	b.SetBytes(int64(bytes))
+	b.SetBytes(3 * int64(bytes)) // we are testing the file 3 times, below
 	s := string(file)
 	b.ReportAllocs()
 
@@ -51,7 +51,7 @@ func BenchmarkValidString(b *testing.B) {
 	}
 
 	bytes := len(file)
-	b.SetBytes(int64(bytes))
+	b.SetBytes(3 * int64(bytes)) // we are testing the file 3 times, below
 	s := string(file)
 	b.ReportAllocs()
 
