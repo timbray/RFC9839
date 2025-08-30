@@ -1,6 +1,7 @@
 package rfc9839
 
 import (
+	"os"
 	"testing"
 	"unicode/utf8"
 )
@@ -295,4 +296,100 @@ func TestAssignables(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestValidSampleUtf8(t *testing.T) {
+	file, err := os.ReadFile("testdata/sample.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Run("Assignables", func(t *testing.T) {
+		if !Assignables.ValidUtf8(file) {
+			t.Error("Assignables.ValidUtf8 failed on sample text")
+		}
+	})
+	t.Run("Scalars", func(t *testing.T) {
+		if !Scalars.ValidUtf8(file) {
+			t.Error("Scalars.ValidUtf8 failed on sample text")
+		}
+	})
+	t.Run("XmlChars", func(t *testing.T) {
+		if !XmlChars.ValidUtf8(file) {
+			t.Error("XmlChars.ValidUtf8 failed on sample text")
+		}
+	})
+}
+
+func TestValidSampleString(t *testing.T) {
+	file, err := os.ReadFile("testdata/sample.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	s := string(file)
+
+	t.Run("Assignables", func(t *testing.T) {
+		if !Assignables.ValidString(s) {
+			t.Error("Assignables.ValidString failed on sample text")
+		}
+	})
+	t.Run("Scalars", func(t *testing.T) {
+		if !Scalars.ValidString(s) {
+			t.Error("Scalars.ValidString failed on sample text")
+		}
+	})
+	t.Run("XmlChars", func(t *testing.T) {
+		if !XmlChars.ValidString(s) {
+			t.Error("XmlChars.ValidString failed on sample text")
+		}
+	})
+}
+
+func TestInvalidSampleUtf8(t *testing.T) {
+	file, err := os.ReadFile("testdata/UTF-8-test.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Run("Assignables", func(t *testing.T) {
+		if Assignables.ValidUtf8(file) {
+			t.Error("Assignables.ValidUtf8 should fail on invalid UTF-8 test file")
+		}
+	})
+	t.Run("Scalars", func(t *testing.T) {
+		if Scalars.ValidUtf8(file) {
+			t.Error("Scalars.ValidUtf8 should fail on invalid UTF-8 test file")
+		}
+	})
+	t.Run("XmlChars", func(t *testing.T) {
+		if XmlChars.ValidUtf8(file) {
+			t.Error("XmlChars.ValidUtf8 should fail on invalid UTF-8 test file")
+		}
+	})
+}
+
+func TestInvalidSampleString(t *testing.T) {
+	file, err := os.ReadFile("testdata/UTF-8-test.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	s := string(file)
+
+	t.Run("Assignables", func(t *testing.T) {
+		if Assignables.ValidString(s) {
+			t.Error("Assignables.ValidString should fail on invalid UTF-8 test file")
+		}
+	})
+	t.Run("Scalars", func(t *testing.T) {
+		if Scalars.ValidString(s) {
+			t.Error("Scalars.ValidString should fail on invalid UTF-8 test file")
+		}
+	})
+	t.Run("XmlChars", func(t *testing.T) {
+		if XmlChars.ValidString(s) {
+			t.Error("XmlChars.ValidString should fail on invalid UTF-8 test file")
+		}
+	})
 }
